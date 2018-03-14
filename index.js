@@ -93,10 +93,10 @@ function Omx (source, args) {
 	// function spawnPlayer (src, out, loop, initialVolume, showOsd) {
 	function spawnPlayer (src, args) {
 
-		let args = buildArgs(src, args);
+		let playerArguments = buildArgs(src, args);
 		// let args = buildArgs(src, out, loop, initialVolume, showOsd);
-		console.log('args for omxplayer:', args);
-		let omxProcess = spawn('omxplayer', args);
+		console.log('args for omxplayer:', playerArguments);
+		let omxProcess = spawn('omxplayer', playerArguments);
 		open = true;
 
 		omxProcess.stdin.setEncoding('utf-8');
