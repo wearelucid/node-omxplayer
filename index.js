@@ -15,36 +15,43 @@ let ALLOWED_OUTPUTS = ['hdmi', 'local', 'both', 'alsa'];
 // ----- Functions ----- //
 
 // Creates an array of arguments to pass to omxplayer.
-function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
+// function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
+function buildArgs (source, args) {
 	let output = '';
 
-	if (givenOutput) {
+	if (args.givenOutput) {
 
-		if (ALLOWED_OUTPUTS.indexOf(givenOutput) === -1) {
-			throw new Error(`Output ${givenOutput} not allowed.`);
+		if (ALLOWED_OUTPUTS.indexOf(args.givenOutput) === -1) {
+			throw new Error(`Output ${args.givenOutput} not allowed.`);
 		}
 
-		output = givenOutput;
+		output = args.givenOutput;
 
 	} else {
 		output = 'local';
 	}
 
 	let osd = false;
-	if (showOsd) {
-		osd = showOsd;
+	if (args.showOsd) {
+		osd = args.showOsd;
 	}
 
 	let args = [source, '-o', output, '--blank', osd ? '' : '--no-osd'];
 
 	// Handle the loop argument, if provided
-	if (loop) {
+	if (args.loop) {
 		args.push('--loop');
 	}
 
+	// ['--font path FreeSans.ttf']
+	// if additional Arguments are defined
+	if (args.additionalArguments instanceof Array) {
+		args.concat(args.additionalArguments);
+	}
+
 	// Handle the initial volume argument, if provided
-	if (Number.isInteger(initialVolume)) {
-		args.push('--vol', initialVolume);
+	if (Number.isInteger(args.initialVolume)) {
+		args.push('--vol', args.initialVolume);
 	}
 
 	return args;
@@ -54,13 +61,15 @@ function buildArgs (source, givenOutput, loop, initialVolume, showOsd) {
 
 // ----- Omx Class ----- //
 
-function Omx (source, output, loop, initialVolume, showOsd) {
+// function Omx (source, output, loop, initialVolume, showOsd) {
+function Omx (source, args) {
 
 	// ----- Local Vars ----- //
 
 	let omxplayer = new EventEmitter();
 	let player = null;
 	let open = false;
+	let omxArguments = args;
 
 	// ----- Local Functions ----- //
 
@@ -81,9 +90,11 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 	}
 
 	// Spawns the omxplayer process.
-	function spawnPlayer (src, out, loop, initialVolume, showOsd) {
+	// function spawnPlayer (src, out, loop, initialVolume, showOsd) {
+	function spawnPlayer (src, args) {
 
-		let args = buildArgs(src, out, loop, initialVolume, showOsd);
+		let args = buildArgs(src, args);
+		// let args = buildArgs(src, out, loop, initialVolume, showOsd);
 		console.log('args for omxplayer:', args);
 		let omxProcess = spawn('omxplayer', args);
 		open = true;
@@ -113,17 +124,19 @@ function Omx (source, output, loop, initialVolume, showOsd) {
 	// ----- Setup ----- //
 
 	if (source) {
-		player = spawnPlayer(source, output, loop, initialVolume, showOsd);
+		// player = spawnPlayer(source, output, loop, initialVolume, showOsd);
+		player = spawnPlayer(source, omxArguments);
 	}
 
 	// ----- Methods ----- //
 
 	// Restarts omxplayer with a new source.
-	omxplayer.newSource = (src, out, loop, initialVolume, showOsd) => {
+	// omxplayer.newSource = (src, out, loop, initialVolume, showOsd) => {
+	omxplayer.newSource = (src, args) => {
 
 		if (open) {
 
-			player.on('close', () => { player = spawnPlayer(src, out, loop, initialVolume, showOsd); });
+			player.on('close', () => { player = spawnPlayer(src, args); });
 			player.removeListener('close', updateStatus);
 			writeStdin('q');
 
