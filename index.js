@@ -36,25 +36,25 @@ function buildArgs (source, args) {
 		osd = args.showOsd;
 	}
 
-	let args = [source, '-o', output, '--blank', osd ? '' : '--no-osd'];
+	let built_args = [source, '-o', output, '--blank', osd ? '' : '--no-osd'];
 
 	// Handle the loop argument, if provided
 	if (args.loop) {
-		args.push('--loop');
+		built_args.push('--loop');
 	}
 
 	// ['--font path FreeSans.ttf']
 	// if additional Arguments are defined
 	if (args.additionalArguments instanceof Array) {
-		args.concat(args.additionalArguments);
+		built_args.concat(args.additionalArguments);
 	}
 
 	// Handle the initial volume argument, if provided
 	if (Number.isInteger(args.initialVolume)) {
-		args.push('--vol', args.initialVolume);
+		built_args.push('--vol', args.initialVolume);
 	}
 
-	return args;
+	return built_args;
 
 }
 
